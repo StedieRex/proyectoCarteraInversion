@@ -1,3 +1,4 @@
+import os # Importamos el módulo os para poder cambiar el directorio de trabajo
 import pandas as pd # Importamos Pandas y para simplificar le asignamos el nombre pd
 
 from pandas_datareader import data as pdr
@@ -12,6 +13,12 @@ import datetime # Importamos datetime pero en este caso no vamos a asignarle nin
 # esto hace que los gráficos se visualicen en el notebook
 import matplotlib.pyplot as plt
 import matplotlib.pylab as pylab
+
+# Obtener el directorio actual del script, para que el directorio este en el mismo lugar que el script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# Cambiar el directorio de trabajo actual al directorio del script
+os.chdir(script_dir)
+
 pylab.rcParams['figure.figsize'] = 20, 10 # Definimos el tamaño de los gráficos para que se ajusten bien al notebook
 
 start = datetime.datetime(2017, 1, 1)
@@ -25,10 +32,26 @@ dataRepsol=pdr.get_data_yahoo('REP.MC', start=start, end=end)
 
 
 #print(dataSantander.head())
-#imprimiendo los datos de cierre de las acciones de cada mes de santander
-print(dataSantander['Close'].resample('M').last())
-print(dataBBVA['Close'].resample('M').last())
-print(dataTelefonica['Close'].resample('M').last())
-print(dataInditex['Close'].resample('M').last())
+#imprimiendo los datos de cierre de las acciones de cada mes de santander, bbva, telefonica e inditex
+# print(dataSantander['Close'].resample('M').last())
+# print(dataBBVA['Close'].resample('M').last())
+# print(dataTelefonica['Close'].resample('M').last())
+# print(dataInditex['Close'].resample('M').last())
 
+cierreSantander=dataSantander['Close'].resample('M').last()
+cierreBBVA=dataBBVA['Close'].resample('M').last()
+cierreTelefonica=dataTelefonica['Close'].resample('M').last()
+cierreInditex=dataInditex['Close'].resample('M').last()
+cierreRepsol=dataRepsol['Close'].resample('M').last()
 
+dfEmpresas=pd.DataFrame(index=cierreSantander.index)
+dfEmpresas['Santander']=cierreSantander.loc[:]
+dfEmpresas['BBVA']=cierreBBVA.loc[:]
+dfEmpresas['Telefonica']=cierreTelefonica.loc[:]
+dfEmpresas['Inditex']=cierreInditex.loc[:]
+dfEmpresas['Repsol']=cierreRepsol.loc[:]
+
+print(dfEmpresas)
+
+# guardar en un archivo csv
+dfEmpresas.to_csv('preciosCierreEmpresas.csv')

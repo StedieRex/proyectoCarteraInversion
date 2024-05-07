@@ -6,7 +6,8 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 # Cambiar el directorio de trabajo actual al directorio del script
 os.chdir(script_dir)
 
-def c(cartera,df):
+# aqui se aplica la mutacion
+def valanceandoInversion(cartera,df):
     
     numFilas = len(df)
 
@@ -45,6 +46,7 @@ def buscandoIguales(cartera,carteras):
             return True
     return False
 
+'''falta que esta funcion no de carteras iguales'''
 def crarCarteras(df):#cada cartera es un individuo
     numeroCarteras=10
     
@@ -69,6 +71,20 @@ def crarCarteras(df):#cada cartera es un individuo
         #     numeroCarteras+=1
 
     return carteras
+
+def ruleta(mejoresPortafolios):
+    CreandoRuleta = []
+    for portafolio in mejoresPortafolios:
+        for _ in range(int(portafolio[4])): #se añade el portafolio a la ruleta tantas veces como su rendimiento
+            CreandoRuleta.append(portafolio)
+
+    numGiros = 5
+    elegidos = []
+    for _ in range(numGiros):
+        elegidos.append(random.choice(CreandoRuleta))
+
+    return elegidos
+
 def main():
     df = pd.read_csv('data/preciosCierreEmpresas.csv')
     #print(df)
@@ -76,9 +92,11 @@ def main():
 
     mejoresPortafolios = []
     for cartera in misCarteras:
-        mejoresPortafolios.append(c(cartera,df))
+        mejoresPortafolios.append(valanceandoInversion(cartera,df))
 
-    print(mejoresPortafolios)
+    seleccion = ruleta(mejoresPortafolios)
+    print(seleccion)
+    #print(mejoresPortafolios)
 
 
 main()

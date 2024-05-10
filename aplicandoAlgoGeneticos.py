@@ -1,27 +1,29 @@
 import pandas as pd
 import random
 import os
+import math
 # Obtener el directorio actual del script, para que el directorio este en el mismo lugar que el script
 script_dir = os.path.dirname(os.path.abspath(__file__))
 # Cambiar el directorio de trabajo actual al directorio del script
 os.chdir(script_dir)
 
+    
 # aqui se aplica la mutacion
-def valanceandoInversion(cartera,df):
+def valanceandoInversion(cartera,df): #funcion de aptitud
     
     numFilas = len(df)
 
     #print(numFilas)
-    arrayBBVA = df[cartera[0]].values
-    arrayTEF = df[cartera[1]].values
+    arrayActivoa = df[cartera[0]].values
+    arrayActivob = df[cartera[1]].values
 
     #print(arrayBBVA)
     #print(arrayTEF)
     #print(sum(arrayBBVA))
     #print(sum(arrayTEF))
 
-    REa = sum(arrayBBVA)/numFilas #reindimiento individual de la empresa a
-    REb = sum(arrayTEF)/numFilas #reindimiento individual de la empresa b
+    REa = sum(arrayActivoa)/numFilas #reindimiento individual de la empresa a
+    REb = sum(arrayActivob)/numFilas #reindimiento individual de la empresa b
     #print(REa)
     #print(REb)
 
@@ -30,23 +32,48 @@ def valanceandoInversion(cartera,df):
     rendimiento = (0.5*REa)+(0.5*REb)
     if rendimiento < 0.4*REa+0.6*REb:
         rendimiento = 0.4*REa+0.6*REb
-        return (cartera[0],cartera[1],0.4,0.6,rendimiento)
+        rf = rendimiento/calculandoRiesgo(cartera[0],cartera[1],REa,REb,df,0.4,0.6)
+        return [cartera[0],cartera[1],0.4,0.6,rf] #activo a, activo b, porcentajeInversion a, porcentajeInversion b, rendimiento final
     if rendimiento < 0.6*REa+0.4*REb:
         rendimiento = 0.6*REa+0.4*REb
-        return (cartera[0],cartera[1],0.6,0.4,rendimiento)
+        rf = rendimiento/calculandoRiesgo(cartera[0],cartera[1],REa,REb,df,0.6,0.4)
+        return [cartera[0],cartera[1],0.6,0.4,rf]
     
-    return (cartera[0],cartera[1],0.5,0.5,rendimiento)
+    rf= rendimiento/calculandoRiesgo(cartera[0],cartera[1],REa,REb,df,0.5,0.5)
+    return [cartera[0],cartera[1],0.5,0.5,rf]
 
-def buscandoIguales(cartera,carteras):
-    if carteras == []:
+def calculandoRiesgo(c1,c2,RI1,RI2,df,p1,p2):
+    varA=0
+    varB=0
+    numFilas = len(df)
+    arrayBBVA = df[c1].values
+    arrayTEF = df[c2].values
+    for i in range(numFilas):
+        varA += ((arrayBBVA[i]-RI1)**2)/(numFilas-1)
+        varB += ((arrayTEF[i]-RI2)**2)/(numFilas-1)
+
+    covAB = 0
+    for i in range(numFilas):
+        covAB += ((arrayBBVA[i]-RI1)+(arrayTEF[i]-RI2))/(numFilas-1)
+
+    riesgo = (p1**2)*varA + (p2**2)*varB + 2*p1*p2*covAB
+    return math.sqrt(riesgo)
+
+def comparandoCarteras(cartera,carteras):
+
+    if len(carteras)==0:
         return True
     
     for cartera2 in carteras:
-        if cartera[0] == cartera2[0] and cartera[1] == cartera2[1]:
-            return True
-    return False
+        if cartera2[0]==cartera[0] or cartera2[0]==cartera[1]:
+            if cartera2[1]==cartera[0] or cartera2[1]==cartera[1]:
+                return False
+        if cartera2[1]==cartera[0] or cartera2[1]==cartera[1]:
+            if cartera2[0]==cartera[0] or cartera2[0]==cartera[1]:
+                return False
+    return True
 
-'''falta que esta funcion no de carteras iguales'''
+
 def crarCarteras(df):#cada cartera es un individuo
     numeroCarteras=10
     
@@ -62,13 +89,10 @@ def crarCarteras(df):#cada cartera es un individuo
             cartera.append(eleccion1)
             empresas.remove(eleccion1)
 
-        carteras.append(cartera)
-        numeroCarteras-=1
-        # if buscandoIguales(cartera,carteras):
-        #     carteras.append(cartera)
-        #     numeroCarteras-=1
-        # else:
-        #     numeroCarteras+=1
+        if comparandoCarteras(cartera,carteras):
+            carteras.append(cartera)
+            numeroCarteras-=1
+        
 
     return carteras
 
@@ -90,11 +114,11 @@ def main():
     #print(df)
     misCarteras=crarCarteras(df)
 
-    mejoresPortafolios = []
+    mejoresCarteras = []
     for cartera in misCarteras:
-        mejoresPortafolios.append(valanceandoInversion(cartera,df))
+        mejoresCarteras.append(valanceandoInversion(cartera,df))
 
-    seleccion = ruleta(mejoresPortafolios)
+    seleccion = ruleta(mejoresCarteras)
     print(seleccion)
     #print(mejoresPortafolios)
 

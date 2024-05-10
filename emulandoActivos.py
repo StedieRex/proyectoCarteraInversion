@@ -29,6 +29,11 @@ dataBBVA=pdr.get_data_yahoo('BBVA.MC', start=start, end=end)
 dataTelefonica=pdr.get_data_yahoo('TEF.MC', start=start, end=end)
 dataInditex=pdr.get_data_yahoo('ITX.MC', start=start, end=end)
 dataRepsol=pdr.get_data_yahoo('REP.MC', start=start, end=end)
+dataNuevo = pdr.get_data_yahoo('ACS.MC', start=start, end=end)
+dataNuevo2 = pdr.get_data_yahoo('FER.MC', start=start, end=end)
+dataNuevo3 = pdr.get_data_yahoo('GRF.MC', start=start, end=end) 
+dataNuevo4 = pdr.get_data_yahoo('IAG.MC', start=start, end=end)
+dataNuevo5 = pdr.get_data_yahoo('AMS.MC', start=start, end=end)
 
 
 #print(dataSantander.head())
@@ -43,6 +48,11 @@ cierreBBVA=dataBBVA['Close'].resample('M').last()
 cierreTelefonica=dataTelefonica['Close'].resample('M').last()
 cierreInditex=dataInditex['Close'].resample('M').last()
 cierreRepsol=dataRepsol['Close'].resample('M').last()
+cierreNuevo = dataNuevo['Close'].resample('M').last()
+cierreNuevo2 = dataNuevo2['Close'].resample('M').last()
+cierreNuevo3 = dataNuevo3['Close'].resample('M').last()
+cierreNuevo4 = dataNuevo4['Close'].resample('M').last()
+cierreNuevo5 = dataNuevo5['Close'].resample('M').last()
 
 dfEmpresas=pd.DataFrame(index=cierreSantander.index)
 dfEmpresas['Santander']=cierreSantander.loc[:]
@@ -50,8 +60,13 @@ dfEmpresas['BBVA']=cierreBBVA.loc[:]
 dfEmpresas['Telefonica']=cierreTelefonica.loc[:]
 dfEmpresas['Inditex']=cierreInditex.loc[:]
 dfEmpresas['Repsol']=cierreRepsol.loc[:]
+dfEmpresas['ACS']=cierreNuevo.loc[:]  #añadiendo acs
+dfEmpresas['Ferrovial']=cierreNuevo2.loc[:] #añadiendo ferrovial
+dfEmpresas['Grifols']=cierreNuevo3.loc[:] #añadiendo grifols
+dfEmpresas['IAG']=cierreNuevo4.loc[:] #añadiendo iag
+dfEmpresas['Amadeus']=cierreNuevo5.loc[:] #añadiendo amadeus
 
 print(dfEmpresas)
 
 # guardar en un archivo csv
-dfEmpresas.to_csv('preciosCierreEmpresas.csv')
+dfEmpresas.to_csv('data/preciosCierreEmpresas.csv')

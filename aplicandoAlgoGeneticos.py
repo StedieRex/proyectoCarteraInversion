@@ -74,7 +74,7 @@ def comparandoCarteras(cartera,carteras):
     return True
 
 
-def crarCarteras(df):#cada cartera es un individuo
+def crearCarteras(df):#cada cartera es un individuo
     numeroCarteras=10
     
     carteras=[]
@@ -102,7 +102,7 @@ def ruleta(mejoresPortafolios):
         for _ in range(int(portafolio[4])): #se añade el portafolio a la ruleta tantas veces como su rendimiento
             CreandoRuleta.append(portafolio)
 
-    numGiros = 5
+    numGiros = 6
     elegidos = []
     while numGiros>0:
         integrar = random.choice(CreandoRuleta)
@@ -112,18 +112,37 @@ def ruleta(mejoresPortafolios):
 
     return elegidos
 
-def cruzandoMejores(seleccion):
-    # tomo las primeras 2 carteras y las cruzo con el resoto hasta optener las otras 10 carteras
-    nuevaGeneracion = []
-    totalCarteras = len(seleccion)-1
-    i=0
+def  tomarMejoresActivos():
+    
 
-    while i<totalCarteras:
-        nuevaCartera = []
-        nuevaCartera.append(seleccion[i][0])
-        nuevaCartera.append(seleccion[i+1][1])
-        nuevaGeneracion.append(nuevaCartera)
-        i+=1
+def cruzandoMejores(seleccion,prim2):
+    # tomo las primeras 2 carteras y las cruzo con el resto hasta optener las otras 10 carteras
+    nuevaGeneracion = []
+    noHIjos = 10
+    pivote = 2
+
+    while True:
+        for mejor in prim2:
+            for cartera in seleccion:
+                #tomamos el mejor activo de la cartera sobrante
+                if cartera[pivote]>cartera[pivote+1]:
+                    activo1 = cartera[pivote-2]
+                    p1 = cartera[pivote] #porcentage
+                else:
+                    activo1 = cartera[pivote-1]
+                    p1 = cartera[pivote+1]
+
+                #tomamos el mejor activo de uno de los mejores 2 seleccionados
+                if mejor[pivote]>mejor[pivote+1]:
+                    activo2 = mejor[pivote-2]
+                    p2 = mejor[pivote] #porcentage
+                else:
+                    activo2 = mejor[pivote-1]
+                    p2 = mejor[pivote+1]
+                
+            
+    #while i<totalCarteras:
+        
 
 def main():
     #-------Cargando los datos de los activos en un dataFrame------
@@ -139,8 +158,18 @@ def main():
 
     seleccion = ruleta(carterasValanceadas)
     #print(seleccion)
-    #-------comienza la creacion de las nuevas generaciones-------
-    nuevaGeneracion = []
-    nuevaGeneracion.append(cruzandoMejores(seleccion))
+    #-------comienza la creacion de las nuevas generaciones------- 
+    primerosDos = []
+    seleccion = sorted(seleccion, key=lambda x: x[4], reverse=True)
+    primerosDos.append(seleccion[0])
+    primerosDos.append(seleccion[1])
+    e1 = seleccion[0]
+    e2 = seleccion[1]
+    seleccion.remove(e1) 
+    seleccion.remove(e2)
+    # print(primeraSeleccion)
+    # print(segundaSeleccion)
+    # print(seleccion)
+    nuevaGeneracion=cruzandoMejores(seleccion,primerosDos)
 
 main()

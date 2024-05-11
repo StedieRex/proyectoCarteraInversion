@@ -112,44 +112,68 @@ def ruleta(mejoresPortafolios):
 
     return elegidos
 
-def  tomarMejoresActivos():
-    
+#def  tomarMejoresActivos():
 
-def cruzandoMejores(seleccion,prim2):
+
+def cruzandoMejores(seleccion,primeros2):
     # tomo las primeras 2 carteras y las cruzo con el resto hasta optener las otras 10 carteras
     nuevaGeneracion = []
+    hijo = []
     noHIjos = 10
     pivote = 2
 
-    while True:
-        for mejor in prim2:
-            for cartera in seleccion:
-                #tomamos el mejor activo de la cartera sobrante
-                if cartera[pivote]>cartera[pivote+1]:
-                    activo1 = cartera[pivote-2]
-                    p1 = cartera[pivote] #porcentage
-                else:
-                    activo1 = cartera[pivote-1]
-                    p1 = cartera[pivote+1]
+    for cartera in primeros2:
+        if cartera[pivote]>cartera[pivote+1]:
+            hijo.append(cartera[pivote-2])
+        else:
+            hijo.append(cartera[pivote-1])
+    nuevaGeneracion.extend(hijo)
+    print(nuevaGeneracion)
+    hijo.clear()
+    noHIjos-=1
+    
+    for mejor in primeros2:
+        hijo = []
+        #tomamos el mejor activo de una cartera de las primeras 2 mejores
+        if mejor[pivote]>mejor[pivote+1]:
+            hijo.append(mejor[pivote-2])
+        else:
+            hijo.append(mejor[pivote-1])
 
-                #tomamos el mejor activo de uno de los mejores 2 seleccionados
-                if mejor[pivote]>mejor[pivote+1]:
-                    activo2 = mejor[pivote-2]
-                    p2 = mejor[pivote] #porcentage
-                else:
-                    activo2 = mejor[pivote-1]
-                    p2 = mejor[pivote+1]
-                
-            
-    #while i<totalCarteras:
-        
+        for cartera in seleccion:
+            #tomamos el mejor activo de la cartera sobrante
+            if cartera[pivote]>cartera[pivote+1]:
+                hijo.append(cartera[pivote-2])
+                e = cartera[pivote-2]
+            else:
+                hijo.append(cartera[pivote-1])
+                e = cartera[pivote-1]
+
+            print(hijo)
+            nuevaGeneracion.extend(hijo)
+            hijo.remove(e)
+            #print(nuevaGeneracion)
+            noHIjos-=1
+            if noHIjos<0:
+                print(nuevaGeneracion)
+                return nuevaGeneracion
+        hijo.clear()
+
+    return nuevaGeneracion
+    
+
+def darFormato(carteras):
+    carterasF = []
+    for i in range(0,len(carteras),2):
+        carterasF.append([carteras[i],carteras[i+1]])
+    return carterasF    
 
 def main():
     #-------Cargando los datos de los activos en un dataFrame------
     df = pd.read_csv('data/preciosCierreEmpresas.csv')
     #print(df)
     #-------Crando las carteras de forma aleatoria------
-    misCarteras=crarCarteras(df)
+    misCarteras=crearCarteras(df)
 
     #-------Dando su medida a cada cartera con la funcion de aptitud------
     carterasValanceadas = []
@@ -157,7 +181,7 @@ def main():
         carterasValanceadas.append(valanceandoInversion(cartera,df))
 
     seleccion = ruleta(carterasValanceadas)
-    #print(seleccion)
+    print(seleccion)
     #-------comienza la creacion de las nuevas generaciones------- 
     primerosDos = []
     seleccion = sorted(seleccion, key=lambda x: x[4], reverse=True)
@@ -167,9 +191,19 @@ def main():
     e2 = seleccion[1]
     seleccion.remove(e1) 
     seleccion.remove(e2)
-    # print(primeraSeleccion)
-    # print(segundaSeleccion)
-    # print(seleccion)
-    nuevaGeneracion=cruzandoMejores(seleccion,primerosDos)
+    #print(primerosDos)
+    #print(seleccion)
+    sinFormato=cruzandoMejores(seleccion,primerosDos)
+    #print(CarterasNuevaGeneracion)
+
+    CarterasNuevaGeneracion=darFormato(sinFormato)
+
+    print(CarterasNuevaGeneracion)
+    print(" ")
+    nuevaGeneracionValanceada = []
+    for cartera in CarterasNuevaGeneracion:
+        nuevaGeneracionValanceada.append(valanceandoInversion(cartera,df))
+    print(nuevaGeneracionValanceada)
+
 
 main()

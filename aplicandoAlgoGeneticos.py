@@ -104,23 +104,43 @@ def ruleta(mejoresPortafolios):
 
     numGiros = 5
     elegidos = []
-    for _ in range(numGiros):
-        elegidos.append(random.choice(CreandoRuleta))
+    while numGiros>0:
+        integrar = random.choice(CreandoRuleta)
+        if comparandoCarteras(integrar,elegidos):
+            numGiros-=1
+            elegidos.append(integrar)
 
     return elegidos
 
+def cruzandoMejores(seleccion):
+    # tomo las primeras 2 carteras y las cruzo con el resoto hasta optener las otras 10 carteras
+    nuevaGeneracion = []
+    totalCarteras = len(seleccion)-1
+    i=0
+
+    while i<totalCarteras:
+        nuevaCartera = []
+        nuevaCartera.append(seleccion[i][0])
+        nuevaCartera.append(seleccion[i+1][1])
+        nuevaGeneracion.append(nuevaCartera)
+        i+=1
+
 def main():
+    #-------Cargando los datos de los activos en un dataFrame------
     df = pd.read_csv('data/preciosCierreEmpresas.csv')
     #print(df)
+    #-------Crando las carteras de forma aleatoria------
     misCarteras=crarCarteras(df)
 
-    mejoresCarteras = []
+    #-------Dando su medida a cada cartera con la funcion de aptitud------
+    carterasValanceadas = []
     for cartera in misCarteras:
-        mejoresCarteras.append(valanceandoInversion(cartera,df))
+        carterasValanceadas.append(valanceandoInversion(cartera,df))
 
-    seleccion = ruleta(mejoresCarteras)
-    print(seleccion)
-    #print(mejoresPortafolios)
-
+    seleccion = ruleta(carterasValanceadas)
+    #print(seleccion)
+    #-------comienza la creacion de las nuevas generaciones-------
+    nuevaGeneracion = []
+    nuevaGeneracion.append(cruzandoMejores(seleccion))
 
 main()

@@ -124,9 +124,22 @@ def cruzandoMejores(seleccion,primeros2):
 
     for cartera in primeros2:
         if cartera[pivote]>cartera[pivote+1]:
-            hijo.append(cartera[pivote-2])
+            if len(hijo)>0:
+                if cartera[pivote-2]==hijo[0]:
+                    hijo.append(cartera[pivote-1])
+                else:
+                    hijo.append(cartera[pivote-2])
+            else:
+                hijo.append(cartera[pivote-2])
         else:
-            hijo.append(cartera[pivote-1])
+            if len(hijo)>0:
+                if cartera[pivote-1]==hijo[0]:
+                    hijo.append(cartera[pivote-2])
+                else:
+                    hijo.append(cartera[pivote-1])
+            else:
+                hijo.append(cartera[pivote-1])
+
     nuevaGeneracion.extend(hijo)
     print(nuevaGeneracion)
     hijo.clear()
@@ -143,11 +156,19 @@ def cruzandoMejores(seleccion,primeros2):
         for cartera in seleccion:
             #tomamos el mejor activo de la cartera sobrante
             if cartera[pivote]>cartera[pivote+1]:
-                hijo.append(cartera[pivote-2])
-                e = cartera[pivote-2]
+                if cartera[pivote-2] == hijo[0]:
+                    hijo.append(cartera[pivote-1])
+                    e = cartera[pivote-1]
+                else:    
+                    hijo.append(cartera[pivote-2])
+                    e = cartera[pivote-2]
             else:
-                hijo.append(cartera[pivote-1])
-                e = cartera[pivote-1]
+                if cartera[-1] == hijo[0]:
+                    hijo.append(cartera[pivote-2])
+                    e = cartera[pivote-2]
+                else:
+                    hijo.append(cartera[pivote-1])
+                    e = cartera[pivote-1]
 
             print(hijo)
             nuevaGeneracion.extend(hijo)

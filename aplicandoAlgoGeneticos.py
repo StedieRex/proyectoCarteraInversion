@@ -102,7 +102,7 @@ def ruleta(mejoresPortafolios):
         for _ in range(int(portafolio[4])): #se añade el portafolio a la ruleta tantas veces como su rendimiento
             CreandoRuleta.append(portafolio)
 
-    numGiros = 6
+    numGiros = 7 # El default es 6
     elegidos = []
     while numGiros>0:
         integrar = random.choice(CreandoRuleta)
@@ -141,7 +141,7 @@ def cruzandoMejores(seleccion,primeros2):
                 hijo.append(cartera[pivote-1])
 
     nuevaGeneracion.extend(hijo)
-    print(nuevaGeneracion)
+    #print(nuevaGeneracion)
     hijo.clear()
     noHIjos-=1
     
@@ -176,7 +176,7 @@ def cruzandoMejores(seleccion,primeros2):
             #print(nuevaGeneracion)
             noHIjos-=1
             if noHIjos<0:
-                print(nuevaGeneracion)
+                #print(nuevaGeneracion)
                 return nuevaGeneracion
         hijo.clear()
 
@@ -205,30 +205,37 @@ def main():
     seleccion = ruleta(carterasValanceadas)
     #print(seleccion)
     #-------comienza la creacion de las nuevas generaciones------- 
-    primerosDos = []
-    seleccion = sorted(seleccion, key=lambda x: x[4], reverse=True)
-    primerosDos.append(seleccion[0])
-    primerosDos.append(seleccion[1])
-    e1 = seleccion[0]
-    e2 = seleccion[1]
-    seleccion.remove(e1) 
-    seleccion.remove(e2)
-    #print(primerosDos)
-    #print(seleccion)
-    sinFormato=cruzandoMejores(seleccion,primerosDos)
-    #print(CarterasNuevaGeneracion)
+    n=3
+    i=0
+    for _ in range(n):
+        i+=1
+        primerosDos = []
+        seleccion = sorted(seleccion, key=lambda x: x[4], reverse=True)
+        primerosDos.append(seleccion[0])
+        primerosDos.append(seleccion[1])
+        e1 = seleccion[0]
+        e2 = seleccion[1]
+        seleccion.remove(e1) 
+        seleccion.remove(e2)
+        #print(primerosDos)
+        #print(seleccion)
+        sinFormato=cruzandoMejores(seleccion,primerosDos)
+        #print(CarterasNuevaGeneracion)
 
-    #aqui se eliminan los elementos repetidos que podemos tener en la cruza
-    CarterasNuevaGeneracion=darFormato(sinFormato)
+        #aqui se eliminan los elementos repetidos que podemos tener en la cruza
+        CarterasNuevaGeneracion=darFormato(sinFormato)
 
-    print(CarterasNuevaGeneracion)
-    print(" ")
-    nuevaGeneracionValanceada = []
-    for cartera in CarterasNuevaGeneracion:
-        nuevaGeneracionValanceada.append(valanceandoInversion(cartera,df))
+        #print(CarterasNuevaGeneracion)
+        #print(" ")
+        nuevaGeneracionValanceada = []
+        for cartera in CarterasNuevaGeneracion:
+            nuevaGeneracionValanceada.append(valanceandoInversion(cartera,df))
 
-    nuevaGeneracionValanceada = sorted(nuevaGeneracionValanceada, key=lambda x: x[4], reverse=True)
-    print(nuevaGeneracionValanceada)
+        seleccion.clear()
+        seleccion = sorted(nuevaGeneracionValanceada, key=lambda x: x[4], reverse=True)
+        print("Generacion No:", i)
+        print(seleccion)
+        print(" ")
 
 
 main()

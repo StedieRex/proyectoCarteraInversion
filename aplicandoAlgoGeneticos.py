@@ -170,7 +170,7 @@ def cruzandoMejores(seleccion,primeros2):
                     hijo.append(cartera[pivote-1])
                     e = cartera[pivote-1]
 
-            print(hijo)
+            #print(hijo)
             nuevaGeneracion.extend(hijo)
             hijo.remove(e)
             #print(nuevaGeneracion)
@@ -186,7 +186,8 @@ def cruzandoMejores(seleccion,primeros2):
 def darFormato(carteras):
     carterasF = []
     for i in range(0,len(carteras),2):
-        carterasF.append([carteras[i],carteras[i+1]])
+        if comparandoCarteras([carteras[i],carteras[i+1]],carterasF):
+            carterasF.append([carteras[i],carteras[i+1]])
     return carterasF    
 
 def main():
@@ -202,7 +203,7 @@ def main():
         carterasValanceadas.append(valanceandoInversion(cartera,df))
 
     seleccion = ruleta(carterasValanceadas)
-    print(seleccion)
+    #print(seleccion)
     #-------comienza la creacion de las nuevas generaciones------- 
     primerosDos = []
     seleccion = sorted(seleccion, key=lambda x: x[4], reverse=True)
@@ -217,6 +218,7 @@ def main():
     sinFormato=cruzandoMejores(seleccion,primerosDos)
     #print(CarterasNuevaGeneracion)
 
+    #aqui se eliminan los elementos repetidos que podemos tener en la cruza
     CarterasNuevaGeneracion=darFormato(sinFormato)
 
     print(CarterasNuevaGeneracion)
@@ -224,6 +226,8 @@ def main():
     nuevaGeneracionValanceada = []
     for cartera in CarterasNuevaGeneracion:
         nuevaGeneracionValanceada.append(valanceandoInversion(cartera,df))
+
+    nuevaGeneracionValanceada = sorted(nuevaGeneracionValanceada, key=lambda x: x[4], reverse=True)
     print(nuevaGeneracionValanceada)
 
 

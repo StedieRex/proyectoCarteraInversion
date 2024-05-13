@@ -2,6 +2,8 @@ import pandas as pd
 import random
 import os
 import math
+import tkinter as tk
+from tkinter import scrolledtext
 # Obtener el directorio actual del script, para que el directorio este en el mismo lugar que el script
 script_dir = os.path.dirname(os.path.abspath(__file__))
 # Cambiar el directorio de trabajo actual al directorio del script
@@ -103,12 +105,17 @@ def ruleta(mejoresPortafolios):
             CreandoRuleta.append(portafolio)
 
     numGiros = 7 # El default es 6
+    maximo = 0
     elegidos = []
     while numGiros>0:
         integrar = random.choice(CreandoRuleta)
         if comparandoCarteras(integrar,elegidos):
             numGiros-=1
             elegidos.append(integrar)
+        elif maximo>10:
+            break
+        else:
+            maximo+=1
 
     return elegidos
 
@@ -205,12 +212,25 @@ def main():
     seleccion = ruleta(carterasValanceadas)
     #print(seleccion)
     #-------comienza la creacion de las nuevas generaciones------- 
-    n=3
+    n= int(caja_noIteraciones.get())
     i=0
+    guardarPrimerosLugares = []
     for _ in range(n):
-        i+=1
         primerosDos = []
         seleccion = sorted(seleccion, key=lambda x: x[4], reverse=True)
+        if i==0:
+            cajaTablaAgrupada.config(state="normal")
+            cajaTablaAgrupada.insert(tk.END, f"Primera poblacion:\n")
+            cajaTablaAgrupada.insert(tk.END, f"{seleccion}\n")
+            cajaTablaAgrupada.config(state="disabled")
+            guardarPrimerosLugares.append(seleccion[0])
+        else:
+            cajaTablaAgrupada.config(state="normal")
+            cajaTablaAgrupada.insert(tk.END, f"Generacion No: {i}\n")
+            cajaTablaAgrupada.insert(tk.END, f"{seleccion}\n")
+            cajaTablaAgrupada.config(state="disabled")
+            guardarPrimerosLugares.append(seleccion[0])
+
         primerosDos.append(seleccion[0])
         primerosDos.append(seleccion[1])
         e1 = seleccion[0]
@@ -231,11 +251,89 @@ def main():
         for cartera in CarterasNuevaGeneracion:
             nuevaGeneracionValanceada.append(valanceandoInversion(cartera,df))
 
+
         seleccion.clear()
-        seleccion = sorted(nuevaGeneracionValanceada, key=lambda x: x[4], reverse=True)
-        print("Generacion No:", i)
-        print(seleccion)
-        print(" ")
+        seleccion=ruleta(nuevaGeneracionValanceada)
 
+        i+=1
+        if len(seleccion)==1:
+            break
 
-main()
+    cajaTablaAgrupada.config(state="normal")
+    cajaTablaAgrupada.insert(tk.END, f"Estos son los primeros lugares de cada generacion:\n")
+    cajaTablaAgrupada.insert(tk.END, f"{guardarPrimerosLugares}\n")
+    cajaTablaAgrupada.config(state="disabled")
+    
+    # grafica donde x es el porcentaje de inversion en el activo a, y es el porcentaje de inversion en el activo b, y z es el rendimiento
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import Axes3D
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    x = []
+    y = []
+    z = []
+    for cartera in guardarPrimerosLugares:
+        x.append(cartera[2])
+        y.append(cartera[3])
+        z.append(cartera[4])
+
+    print("x")
+    print(x)
+    print("y")
+    print(y)
+    print("z")
+    print(z)
+
+    ax.scatter(x, y, z, c='r', marker='o')
+    ax.set_xlabel('Porcentaje de inversion en el activo a')
+    ax.set_ylabel('Porcentaje de inversion en el activo b')
+    ax.set_zlabel('Rendimiento')
+    plt.show()
+
+ventana = tk.Tk()
+ventana.title("Algoritmo Genetico")
+ventana.geometry("600x500")
+
+#Etiqueta para la lista de nodos
+etiqueta_lista = tk.Label(ventana, text="Mostrando ejecucion del algoritmo:")
+etiqueta_lista.place(x=800,y=10)
+#caja para mostrar como funciona el algortimo
+
+#-----------------BOTON-----------------
+# Crear un botón para ejecutar el algoritmo
+boton = tk.Button(ventana, text="Ejecutar Algoritmo", command=main)
+boton.place(x=10,y=60)
+
+#-----------------Etiqueta-----------------
+# Crear una etiqueta para mostrar el resultado
+etiqueta = tk.Label(ventana, text="No. iteraciones:")
+etiqueta.place(x=10,y=10)
+
+#-----------------Caja de texto-----------------
+# Crear una caja de texto para ingresar el número de iteraciones
+caja_noIteraciones = tk.Entry(ventana, width=20)#caja para numero de grupos
+caja_noIteraciones.place(x=10,y=30)
+
+caja_noIteraciones.config(state="normal")
+caja_noIteraciones.insert(0, "3")
+caja_noIteraciones.config(state="disabled")
+
+#-----------------Creando la caja de texto con barra de desplazamiento-----------------
+# Crear un Frame que contendrá la caja de texto y la barra de desplazamiento
+frame_contenedor = tk.Frame(ventana)
+frame_contenedor.pack()
+frame_contenedor.config(width=300, height=50)
+frame_contenedor.place(x=190,y=10)
+
+# Crear una caja de texto con barras de desplazamiento vertical
+cajaTablaAgrupada = scrolledtext.ScrolledText(frame_contenedor, height=25, width=45, state="disabled", wrap=tk.NONE)
+cajaTablaAgrupada.pack(side="left", fill="both", expand=True)
+
+# Crear una barra de desplazamiento horizontal
+scrollbar_horizontal = tk.Scrollbar(frame_contenedor, orient=tk.HORIZONTAL, command=cajaTablaAgrupada.xview)
+scrollbar_horizontal.place(x=0, y=388, relwidth=.96, height=20)
+
+# Configurar la caja de texto para desplazarse horizontalmente
+cajaTablaAgrupada.config(xscrollcommand=scrollbar_horizontal.set)
+
+ventana.mainloop()

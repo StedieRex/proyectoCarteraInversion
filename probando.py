@@ -136,9 +136,13 @@ def cruzando(c1,c2):
         mejorIndiceA = 1
 
     if c2[indicePorcentaje]>c2[indicePorcentaje+1] and c1[indiceActivo]!=c2[mejorIndiceA]:
+        print(f"1.[c2{c2[mejorIndiceA]},c1{c1[indiceActivo]}]")
         return[c2[mejorIndiceA],c1[indiceActivo]]
-    else:
+    elif(c1[indiceActivo+1]!=c2[mejorIndiceA]):
+        print(f"2.[c2{c2[mejorIndiceA]},c1{c1[indiceActivo+1]}]")
         return[c2[mejorIndiceA],c1[indiceActivo+1]]
+    else:
+        return[c2[mejorIndiceA],c1[indiceActivo]]
 
 def darFormato(carteras):
     carterasF = []
@@ -166,15 +170,17 @@ def main():
     i=0
     guardarPrimerosLugares = []
     noHijos = 8
+
+    seleccion = sorted(seleccion, key=lambda x: x[4], reverse=True)
+
+    cajaTablaAgrupada.config(state="normal")
+    cajaTablaAgrupada.insert(tk.END, f"Primera poblacion:\n")
+    cajaTablaAgrupada.insert(tk.END, f"{seleccion}\n")
+    cajaTablaAgrupada.config(state="disabled")
+    guardarPrimerosLugares.append(seleccion[0])
+    
     for _ in range(n):
         primerosDos = []
-        seleccion = sorted(seleccion, key=lambda x: x[4], reverse=True)
-        if i==0:
-            cajaTablaAgrupada.config(state="normal")
-            cajaTablaAgrupada.insert(tk.END, f"Primera poblacion:\n")
-            cajaTablaAgrupada.insert(tk.END, f"{seleccion}\n")
-            cajaTablaAgrupada.config(state="disabled")
-            guardarPrimerosLugares.append(seleccion[0])
 
         primerosDos.append(seleccion[0])
         primerosDos.append(seleccion[1])
@@ -187,36 +193,36 @@ def main():
         noHijos = 7
         nuevaGeneracionSinValance = []
         nuevaGeneracionSinValance.append(cruzando(primerosDos[1],primerosDos[0]))
+        print("-----------------Creando nueva generacion-----------------")
         for mejorCartera in primerosDos:
             for cartera in seleccion:
                 nuevaGeneracionSinValance.append(cruzando(cartera,mejorCartera))
                 noHijos-=1
                 if noHijos==0:
                     break  
-        nuevaGeneracionSinValance.append([primerosDos[0],primerosDos[1]])
+        print("-----------------Nueva Generacion-----------------")
         print(nuevaGeneracionSinValance)
+        print(" ")
 
-        #aqui se eliminan los elementos repetidos que podemos tener en la cruza
-        # CarterasNuevaGeneracion=darFormato(sinFormato)
-        # CarterasNuevaGeneracion.append(primerosDos[0])
-        # CarterasNuevaGeneracion.append(primerosDos[1])
+        #print(CarterasNuevaGeneracion)
+        #print(" ")
+        nuevaGeneracionValanceada = []
+        for cartera in nuevaGeneracionSinValance:
+            nuevaGeneracionValanceada.append(valanceandoInversion(cartera,df))
 
-        # #print(CarterasNuevaGeneracion)
-        # #print(" ")
-        # nuevaGeneracionValanceada = []
-        # for cartera in CarterasNuevaGeneracion:
-        #     nuevaGeneracionValanceada.append(valanceandoInversion(cartera,df))
+        nuevaGeneracionValanceada.append(primerosDos[0])
+        nuevaGeneracionValanceada.append(primerosDos[1])
 
+        seleccion.clear()
+        seleccion = nuevaGeneracionValanceada
+        i+=1
 
-        # seleccion.clear()
-        # seleccion=ruleta(nuevaGeneracionValanceada)
-
-        # i+=1
-
-        # cajaTablaAgrupada.config(state="normal")
-        # cajaTablaAgrupada.insert(tk.END, f"Generacion No: {i}\n")
-        # cajaTablaAgrupada.insert(tk.END, f"{seleccion}\n")
-        # cajaTablaAgrupada.config(state="disabled")
+        seleccion = sorted(seleccion, key=lambda x: x[4], reverse=True)
+        
+        cajaTablaAgrupada.config(state="normal")
+        cajaTablaAgrupada.insert(tk.END, f"Generacion No: {i}\n")
+        cajaTablaAgrupada.insert(tk.END, f"{seleccion}\n")
+        cajaTablaAgrupada.config(state="disabled")
         # guardarPrimerosLugares.append(seleccion[0])
 
         if len(seleccion)==1:

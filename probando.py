@@ -122,72 +122,23 @@ def ruleta(mejoresPortafolios):
 #def  tomarMejoresActivos():
 
 
-def cruzandoMejores(seleccion,primeros2,noHIjos):
+def cruzando(c1,c2):
     # tomo las primeras 2 carteras y las cruzo con el resto hasta optener las otras 10 carteras
     nuevaGeneracion = []
-    hijo = []
-    pivote = 2
+    indicePorcentaje = 2
+    indiceActivo = 0
 
-    for cartera in primeros2:
-        if cartera[pivote]>cartera[pivote+1]:
-            if len(hijo)>0:
-                if cartera[pivote-2]==hijo[0]:
-                    hijo.append(cartera[pivote-1])
-                else:
-                    hijo.append(cartera[pivote-2])
-            else:
-                hijo.append(cartera[pivote-2])
-        else:
-            if len(hijo)>0:
-                if cartera[pivote-1]==hijo[0]:
-                    hijo.append(cartera[pivote-2])
-                else:
-                    hijo.append(cartera[pivote-1])
-            else:
-                hijo.append(cartera[pivote-1])
+    if c2[indicePorcentaje]>c2[indicePorcentaje+1]:
+        mejorIndiceP = indicePorcentaje
+        mejorIndiceA = 0
+    else:
+        mejorIndiceP = indicePorcentaje+1
+        mejorIndiceA = 1
 
-    nuevaGeneracion.extend(hijo)
-    #print(nuevaGeneracion)
-    hijo.clear()
-    noHIjos-=1
-    
-    for mejor in primeros2:
-        hijo = []
-        #tomamos el mejor activo de una cartera de las primeras 2 mejores
-        if mejor[pivote]>mejor[pivote+1]:
-            hijo.append(mejor[pivote-2])
-        else:
-            hijo.append(mejor[pivote-1])
-
-        for cartera in seleccion:
-            #tomamos el mejor activo de la cartera sobrante
-            if cartera[pivote]>cartera[pivote+1]:
-                if cartera[pivote-2] == hijo[0]:
-                    hijo.append(cartera[pivote-1])
-                    e = cartera[pivote-1]
-                else:    
-                    hijo.append(cartera[pivote-2])
-                    e = cartera[pivote-2]
-            else:
-                if cartera[-1] == hijo[0]:
-                    hijo.append(cartera[pivote-2])
-                    e = cartera[pivote-2]
-                else:
-                    hijo.append(cartera[pivote-1])
-                    e = cartera[pivote-1]
-
-            #print(hijo)
-            nuevaGeneracion.extend(hijo)
-            hijo.remove(e)
-            #print(nuevaGeneracion)
-            noHIjos-=1
-            if noHIjos<0:
-                #print(nuevaGeneracion)
-                return nuevaGeneracion
-        hijo.clear()
-
-    return nuevaGeneracion
-    
+    if c2[indicePorcentaje]>c2[indicePorcentaje+1] and c1[indiceActivo]!=c2[mejorIndiceA]:
+        return[c2[mejorIndiceA],c1[indiceActivo]]
+    else:
+        return[c2[mejorIndiceA],c1[indiceActivo+1]]
 
 def darFormato(carteras):
     carterasF = []
@@ -233,53 +184,61 @@ def main():
         seleccion.remove(e2)
         #print(primerosDos)
         #print(seleccion)
-        sinFormato=cruzandoMejores(seleccion,primerosDos,noHijos)
-        noHijos-=2
-        #print(CarterasNuevaGeneracion)
+        noHijos = 7
+        nuevaGeneracionSinValance = []
+        nuevaGeneracionSinValance.append(cruzando(primerosDos[1],primerosDos[0]))
+        for mejorCartera in primerosDos:
+            for cartera in seleccion:
+                nuevaGeneracionSinValance.append(cruzando(cartera,mejorCartera))
+                noHijos-=1
+                if noHijos==0:
+                    break  
+        nuevaGeneracionSinValance.append([primerosDos[0],primerosDos[1]])
+        print(nuevaGeneracionSinValance)
 
         #aqui se eliminan los elementos repetidos que podemos tener en la cruza
-        CarterasNuevaGeneracion=darFormato(sinFormato)
-        CarterasNuevaGeneracion.append(primerosDos[0])
-        CarterasNuevaGeneracion.append(primerosDos[1])
+        # CarterasNuevaGeneracion=darFormato(sinFormato)
+        # CarterasNuevaGeneracion.append(primerosDos[0])
+        # CarterasNuevaGeneracion.append(primerosDos[1])
 
-        #print(CarterasNuevaGeneracion)
-        #print(" ")
-        nuevaGeneracionValanceada = []
-        for cartera in CarterasNuevaGeneracion:
-            nuevaGeneracionValanceada.append(valanceandoInversion(cartera,df))
+        # #print(CarterasNuevaGeneracion)
+        # #print(" ")
+        # nuevaGeneracionValanceada = []
+        # for cartera in CarterasNuevaGeneracion:
+        #     nuevaGeneracionValanceada.append(valanceandoInversion(cartera,df))
 
 
-        seleccion.clear()
-        seleccion=ruleta(nuevaGeneracionValanceada)
+        # seleccion.clear()
+        # seleccion=ruleta(nuevaGeneracionValanceada)
 
-        i+=1
+        # i+=1
 
-        cajaTablaAgrupada.config(state="normal")
-        cajaTablaAgrupada.insert(tk.END, f"Generacion No: {i}\n")
-        cajaTablaAgrupada.insert(tk.END, f"{seleccion}\n")
-        cajaTablaAgrupada.config(state="disabled")
-        guardarPrimerosLugares.append(seleccion[0])
+        # cajaTablaAgrupada.config(state="normal")
+        # cajaTablaAgrupada.insert(tk.END, f"Generacion No: {i}\n")
+        # cajaTablaAgrupada.insert(tk.END, f"{seleccion}\n")
+        # cajaTablaAgrupada.config(state="disabled")
+        # guardarPrimerosLugares.append(seleccion[0])
 
         if len(seleccion)==1:
             break
 
-    cajaTablaAgrupada.config(state="normal")
-    cajaTablaAgrupada.insert(tk.END, f"Estos son los primeros lugares de cada generacion:\n")
-    cajaTablaAgrupada.insert(tk.END, f"{guardarPrimerosLugares}\n")
-    cajaTablaAgrupada.config(state="disabled")
+    # cajaTablaAgrupada.config(state="normal")
+    # cajaTablaAgrupada.insert(tk.END, f"Estos son los primeros lugares de cada generacion:\n")
+    # cajaTablaAgrupada.insert(tk.END, f"{guardarPrimerosLugares}\n")
+    # cajaTablaAgrupada.config(state="disabled")
     
-    # grafica donde x es el porcentaje de inversion en el activo a, y es el porcentaje de inversion en el activo b, y z es el rendimiento
-    import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    x = []
-    y = []
-    z = []
-    for cartera in seleccion:
-        x.append(cartera[2])
-        y.append(cartera[3])
-        z.append(cartera[4])
+    # # grafica donde x es el porcentaje de inversion en el activo a, y es el porcentaje de inversion en el activo b, y z es el rendimiento
+    # import matplotlib.pyplot as plt
+    # from mpl_toolkits.mplot3d import Axes3D
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
+    # x = []
+    # y = []
+    # z = []
+    # for cartera in seleccion:
+    #     x.append(cartera[2])
+    #     y.append(cartera[3])
+    #     z.append(cartera[4])
 
     # print("x")
     # print(x)
@@ -288,11 +247,11 @@ def main():
     # print("z")
     # print(z)
 
-    ax.scatter(x, y, z, c='r', marker='o')
-    ax.set_xlabel('Porcentaje de inversion en el activo a')
-    ax.set_ylabel('Porcentaje de inversion en el activo b')
-    ax.set_zlabel('Rendimiento')
-    plt.show()
+    # ax.scatter(x, y, z, c='r', marker='o')
+    # ax.set_xlabel('Porcentaje de inversion en el activo a')
+    # ax.set_ylabel('Porcentaje de inversion en el activo b')
+    # ax.set_zlabel('Rendimiento')
+    # plt.show()
 
 ventana = tk.Tk()
 ventana.title("Algoritmo Genetico")

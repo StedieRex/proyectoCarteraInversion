@@ -4,6 +4,7 @@ import os
 import math
 import tkinter as tk
 from tkinter import scrolledtext
+from tkinter import messagebox
 # Obtener el directorio actual del script, para que el directorio este en el mismo lugar que el script
 script_dir = os.path.dirname(os.path.abspath(__file__))
 # Cambiar el directorio de trabajo actual al directorio del script
@@ -11,7 +12,7 @@ os.chdir(script_dir)
 
     
 # aqui se aplica la mutacion
-def valanceandoInversion(cartera,df): #funcion de aptitud
+def valanceandoInversion(cartera,df,pia,pib): #funcion de aptitud
     
     numFilas = len(df)
 
@@ -32,14 +33,14 @@ def valanceandoInversion(cartera,df): #funcion de aptitud
     #rendimiento del portafolio por monto
     #retorna (banco a,banco b,porsentaje1,porcentaje2,rendimiento)
     rendimiento = (0.5*REa)+(0.5*REb)
-    if rendimiento < 0.4*REa+0.6*REb:
-        rendimiento = 0.4*REa+0.6*REb
-        rf = rendimiento/calculandoRiesgo(cartera[0],cartera[1],REa,REb,df,0.4,0.6)
-        return [cartera[0],cartera[1],0.4,0.6,rf] #activo a, activo b, porcentajeInversion a, porcentajeInversion b, rendimiento final
-    if rendimiento < 0.6*REa+0.4*REb:
-        rendimiento = 0.6*REa+0.4*REb
-        rf = rendimiento/calculandoRiesgo(cartera[0],cartera[1],REa,REb,df,0.6,0.4)
-        return [cartera[0],cartera[1],0.6,0.4,rf]
+    if rendimiento < pia*REa+pib*REb:
+        rendimiento = pia*REa+pib*REb
+        rf = rendimiento/calculandoRiesgo(cartera[0],cartera[1],REa,REb,df,pia,pib)
+        return [cartera[0],cartera[1],pia,pib,rf] #activo a, activo b, porcentajeInversion a, porcentajeInversion b, rendimiento final
+    if rendimiento < pib*REa+pia*REb:
+        rendimiento = pib*REa+pia*REb
+        rf = rendimiento/calculandoRiesgo(cartera[0],cartera[1],REa,REb,df,pib,pia)
+        return [cartera[0],cartera[1],pib,pia,rf]
     
     rf= rendimiento/calculandoRiesgo(cartera[0],cartera[1],REa,REb,df,0.5,0.5)
     return [cartera[0],cartera[1],0.5,0.5,rf]
@@ -158,6 +159,24 @@ def darFormato(carteras):
     return carterasF    
 
 def main():
+    try:
+        n=int(caja_noIteraciones.get())
+    except:
+        messagebox.showwarning("Numero de generaciones incorrecto", "Por favor ingrese un numero de generaciones valido.")
+        return
+    if caja_noIteraciones.get() == "" or caja_noIteraciones.get() == "0" or caja_noIteraciones.get() == " ":
+        messagebox.showwarning("Sin numero de generación", "Por favor ingrese el numero de generaciones que desea realizar para la evolución de la población.")
+        return
+    if int(caja_noIteraciones.get()) < 1:
+        messagebox.showwarning("Sin numero de generación", "Por favor ingrese un numero de generaciones mayor a 0.")
+        return
+    if int(caja_noIteraciones.get()) > 5:
+        messagebox.showwarning("Numero de generaciones excedido", "Por favor ingrese un numero de generaciones menor o igual a 5.")
+        return
+    #-------porcentajes dinamicos para el valanceo de invercion------
+    porcentajeInversionA = 0.4
+    porcentajeInversionB = 0.6
+    incrementoInversion = 0.02
     #-------Cargando los datos de los activos en un dataFrame------
     df = pd.read_csv('data/preciosCierreEmpresas.csv')
     #print(df)
@@ -167,12 +186,13 @@ def main():
     #-------Dando su medida a cada cartera con la funcion de aptitud------
     carterasValanceadas = []
     for cartera in misCarteras:
-        carterasValanceadas.append(valanceandoInversion(cartera,df))
+        carterasValanceadas.append(valanceandoInversion(cartera,df,porcentajeInversionA,porcentajeInversionB))
 
+    porcentajeInversionA -= incrementoInversion
+    porcentajeInversionB += incrementoInversion
     seleccion = ruleta(carterasValanceadas)
     #print(seleccion)
     #-------comienza la creacion de las nuevas generaciones------- 
-    n= int(caja_noIteraciones.get())
     i=0
     noHijos = 8
 
@@ -215,7 +235,10 @@ def main():
         #print(" ")
         nuevaGeneracionValanceada = []
         for cartera in nuevaGeneracionSinValance:
-            nuevaGeneracionValanceada.append(valanceandoInversion(cartera,df))
+            nuevaGeneracionValanceada.append(valanceandoInversion(cartera,df,porcentajeInversionA,porcentajeInversionB))
+        porcentajeInversionA -= incrementoInversion
+        porcentajeInversionB += incrementoInversion
+
         nuevaGeneracionValanceada = sorted(nuevaGeneracionValanceada, key=lambda x: x[4], reverse=True)
 
         loMejorDeLaGeneracion.append(nuevaGeneracionValanceada[0])
@@ -242,36 +265,41 @@ def main():
     
     print(loMejorDeLaGeneracion)
 
-    # cajaTablaAgrupada.config(state="normal")
-    # cajaTablaAgrupada.insert(tk.END, f"Estos son los primeros lugares de cada generacion:\n")
-    # cajaTablaAgrupada.insert(tk.END, f"{guardarPrimerosLugares}\n")
-    # cajaTablaAgrupada.config(state="disabled")
+    cajaTablaAgrupada.config(state="normal")
+    cajaTablaAgrupada.insert(tk.END, f"Estos son los primeros lugares de cada generacion:\n")
+    cajaTablaAgrupada.insert(tk.END, f"{loMejorDeLaGeneracion}\n")
+    cajaTablaAgrupada.config(state="disabled")
     
-    # # grafica donde x es el porcentaje de inversion en el activo a, y es el porcentaje de inversion en el activo b, y z es el rendimiento
-    # import matplotlib.pyplot as plt
-    # from mpl_toolkits.mplot3d import Axes3D
-    # fig = plt.figure()
-    # ax = fig.add_subplot(111, projection='3d')
-    # x = []
-    # y = []
-    # z = []
-    # for cartera in seleccion:
-    #     x.append(cartera[2])
-    #     y.append(cartera[3])
-    #     z.append(cartera[4])
+    # grafica donde x es el porcentaje de inversion en el activo a, y es el porcentaje de inversion en el activo b, y z es el rendimiento
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import Axes3D
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    x = []
+    y = []
+    z = []
+    for cartera in loMejorDeLaGeneracion:
+        x.append(cartera[2])
+        y.append(cartera[3])
+        z.append(cartera[4])
 
-    # print("x")
-    # print(x)
-    # print("y")
-    # print(y)
-    # print("z")
-    # print(z)
+    print("x")
+    print(x)
+    print("y")
+    print(y)
+    print("z")
+    print(z)
 
-    # ax.scatter(x, y, z, c='r', marker='o')
-    # ax.set_xlabel('Porcentaje de inversion en el activo a')
-    # ax.set_ylabel('Porcentaje de inversion en el activo b')
-    # ax.set_zlabel('Rendimiento')
-    # plt.show()
+    sc = ax.scatter(x, y, z, c=z, cmap='RdYlGn')
+
+    # Agregar una barra de colores
+    cb = plt.colorbar(sc, ax=ax, shrink=0.5, aspect=5)
+    cb.set_label('Intensidad del color deacuerdo al rendimiento')
+
+    ax.set_xlabel('Porcentaje de inversion en el activo a')
+    ax.set_ylabel('Porcentaje de inversion en el activo b')
+    ax.set_zlabel('Rendimiento')
+    plt.show()
 
 ventana = tk.Tk()
 ventana.title("Algoritmo Genetico")
@@ -297,9 +325,9 @@ etiqueta.place(x=10,y=10)
 caja_noIteraciones = tk.Entry(ventana, width=20)#caja para numero de grupos
 caja_noIteraciones.place(x=10,y=30)
 
-caja_noIteraciones.config(state="normal")
-caja_noIteraciones.insert(0, "3")
-caja_noIteraciones.config(state="disabled")
+# caja_noIteraciones.config(state="normal")
+# caja_noIteraciones.insert(0, "3")
+# caja_noIteraciones.config(state="disabled")
 
 #-----------------Creando la caja de texto con barra de desplazamiento-----------------
 # Crear un Frame que contendrá la caja de texto y la barra de desplazamiento

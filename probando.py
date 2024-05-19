@@ -121,6 +121,12 @@ def ruleta(mejoresPortafolios):
 
 #def  tomarMejoresActivos():
 
+def eliminarRepetidos(lista):
+    listaNueva = []
+    for i in lista:
+        if i not in listaNueva:
+            listaNueva.append(i)
+    return listaNueva
 
 def cruzando(c1,c2):
     # tomo las primeras 2 carteras y las cruzo con el resto hasta optener las otras 10 carteras
@@ -195,7 +201,9 @@ def main():
         #print("-----------------Creando nueva generacion-----------------")
         for mejorCartera in loMejorDeLaGeneracion:
             for cartera in seleccion:
-                nuevaGeneracionSinValance.append(cruzando(cartera,mejorCartera))
+                nuevo = cruzando(cartera,mejorCartera)
+                if comparandoCarteras(nuevo,nuevaGeneracionSinValance) or nuevaGeneracionSinValance ==[]:
+                    nuevaGeneracionSinValance.append(nuevo)
                 noHijos-=1
                 if noHijos==0:
                     break  
@@ -212,6 +220,7 @@ def main():
 
         loMejorDeLaGeneracion.append(nuevaGeneracionValanceada[0])
         loMejorDeLaGeneracion.append(nuevaGeneracionValanceada[1])
+        loMejorDeLaGeneracion = eliminarRepetidos(loMejorDeLaGeneracion)
         loMejorDeLaGeneracion = sorted(loMejorDeLaGeneracion, key=lambda x: x[4], reverse=True)
 
         nuevaGeneracionValanceada.append(loMejorDeLaGeneracion[0])

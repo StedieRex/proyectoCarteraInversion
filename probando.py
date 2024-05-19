@@ -44,7 +44,7 @@ def valanceandoInversion(cartera,df): #funcion de aptitud
     rf= rendimiento/calculandoRiesgo(cartera[0],cartera[1],REa,REb,df,0.5,0.5)
     return [cartera[0],cartera[1],0.5,0.5,rf]
 
-def calculandoRiesgo(c1,c2,RI1,RI2,df,p1,p2):
+def calculandoRiesgo(c1,c2,RI1,RI2,df,p1,p2): #cartera1,cartera2,rendimiento1,rendimiento2,df,p1,p2
     varA=0
     varB=0
     numFilas = len(df)
@@ -136,10 +136,10 @@ def cruzando(c1,c2):
         mejorIndiceA = 1
 
     if c2[indicePorcentaje]>c2[indicePorcentaje+1] and c1[indiceActivo]!=c2[mejorIndiceA]:
-        print(f"1.[c2{c2[mejorIndiceA]},c1{c1[indiceActivo]}]")
+        #print(f"1.[c2{c2[mejorIndiceA]},c1{c1[indiceActivo]}]")
         return[c2[mejorIndiceA],c1[indiceActivo]]
     elif(c1[indiceActivo+1]!=c2[mejorIndiceA]):
-        print(f"2.[c2{c2[mejorIndiceA]},c1{c1[indiceActivo+1]}]")
+        #print(f"2.[c2{c2[mejorIndiceA]},c1{c1[indiceActivo+1]}]")
         return[c2[mejorIndiceA],c1[indiceActivo+1]]
     else:
         return[c2[mejorIndiceA],c1[indiceActivo]]
@@ -168,7 +168,6 @@ def main():
     #-------comienza la creacion de las nuevas generaciones------- 
     n= int(caja_noIteraciones.get())
     i=0
-    guardarPrimerosLugares = []
     noHijos = 8
 
     seleccion = sorted(seleccion, key=lambda x: x[4], reverse=True)
@@ -177,41 +176,46 @@ def main():
     cajaTablaAgrupada.insert(tk.END, f"Primera poblacion:\n")
     cajaTablaAgrupada.insert(tk.END, f"{seleccion}\n")
     cajaTablaAgrupada.config(state="disabled")
-    guardarPrimerosLugares.append(seleccion[0])
     
-    for _ in range(n):
-        primerosDos = []
+    loMejorDeLaGeneracion = [] #es la seleccion de los primeros lugares de cada generacion
 
-        primerosDos.append(seleccion[0])
-        primerosDos.append(seleccion[1])
+    for _ in range(n):
+
+        loMejorDeLaGeneracion.append(seleccion[0])
+        loMejorDeLaGeneracion.append(seleccion[1])
         e1 = seleccion[0]
         e2 = seleccion[1]
         seleccion.remove(e1) 
         seleccion.remove(e2)
-        #print(primerosDos)
+        #print(loMejorDeLaGeneracion)
         #print(seleccion)
         noHijos = 7
         nuevaGeneracionSinValance = []
-        nuevaGeneracionSinValance.append(cruzando(primerosDos[1],primerosDos[0]))
-        print("-----------------Creando nueva generacion-----------------")
-        for mejorCartera in primerosDos:
+        nuevaGeneracionSinValance.append(cruzando(loMejorDeLaGeneracion[1],loMejorDeLaGeneracion[0]))
+        #print("-----------------Creando nueva generacion-----------------")
+        for mejorCartera in loMejorDeLaGeneracion:
             for cartera in seleccion:
                 nuevaGeneracionSinValance.append(cruzando(cartera,mejorCartera))
                 noHijos-=1
                 if noHijos==0:
                     break  
-        print("-----------------Nueva Generacion-----------------")
-        print(nuevaGeneracionSinValance)
-        print(" ")
+        # print("-----------------Nueva Generacion-----------------")
+        # print(nuevaGeneracionSinValance)
+        # print(" ")
 
         #print(CarterasNuevaGeneracion)
         #print(" ")
         nuevaGeneracionValanceada = []
         for cartera in nuevaGeneracionSinValance:
             nuevaGeneracionValanceada.append(valanceandoInversion(cartera,df))
+        nuevaGeneracionValanceada = sorted(nuevaGeneracionValanceada, key=lambda x: x[4], reverse=True)
 
-        nuevaGeneracionValanceada.append(primerosDos[0])
-        nuevaGeneracionValanceada.append(primerosDos[1])
+        loMejorDeLaGeneracion.append(nuevaGeneracionValanceada[0])
+        loMejorDeLaGeneracion.append(nuevaGeneracionValanceada[1])
+        loMejorDeLaGeneracion = sorted(loMejorDeLaGeneracion, key=lambda x: x[4], reverse=True)
+
+        nuevaGeneracionValanceada.append(loMejorDeLaGeneracion[0])
+        nuevaGeneracionValanceada.append(loMejorDeLaGeneracion[1])
 
         seleccion.clear()
         seleccion = nuevaGeneracionValanceada
@@ -223,10 +227,11 @@ def main():
         cajaTablaAgrupada.insert(tk.END, f"Generacion No: {i}\n")
         cajaTablaAgrupada.insert(tk.END, f"{seleccion}\n")
         cajaTablaAgrupada.config(state="disabled")
-        # guardarPrimerosLugares.append(seleccion[0])
 
         if len(seleccion)==1:
             break
+    
+    print(loMejorDeLaGeneracion)
 
     # cajaTablaAgrupada.config(state="normal")
     # cajaTablaAgrupada.insert(tk.END, f"Estos son los primeros lugares de cada generacion:\n")
